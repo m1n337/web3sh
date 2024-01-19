@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/sh
 
 # check exist
 if [[ ! -f .web3sh/.web3env ]]; then

@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/sh
 
 # Store the correct profile file (i.e. .profile for bash or .zshenv for ZSH).
 case $SHELL in
