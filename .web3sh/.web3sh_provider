@@ -1,0 +1,283 @@
+# select a chain and inject environments: ETH_RPC_URL, ETHERSCAN_API_KEY, ETHERSCAN_API_URL, CHAIN
+select_chain() {
+    chain=$1
+    chain_id_res=$(get_chain_id $chain)
+
+    if [ -z "$chain_id_res" ] || [[ "$chain_id_res" == "Error:"* ]]; then
+        echo $chain_id_res
+    else
+        chain_name_res=$(get_chain_name $chain_id_res)
+        if [ -z "$chain_name_res" ] || [[ "$chain_name_res" == "Error:"* ]]; then
+            echo $chain_name_res
+        else
+            # main:
+            echo "Select context for ${chain_name_res} (id=${chain_id_res}) ..."
+
+            # foundry/cast format environments
+            export ETH_RPC_URL=$(_get_provider $chain_id_res)
+            export ETHERSCAN_API_KEY=$(_get_ethscan_api $chain_id_res)
+            export ETHERSCAN_API_URL=$(_get_ethscan_api_url $chain_id_res)
+            export CHAIN=$chain_id_res
+        fi  
+    fi
+}
+
+unset_chain() {
+    unset ETH_RPC_URL
+    unset ETHERSCAN_API_KEY
+    unset ETHERSCAN_API_URL
+    unset CHAIN
+
+    unset $(env | grep '^web3sh_' | awk -F'=' '{print $1}')  
+}
+
+get_chain_name() {
+    chain_id=$1
+
+    case $chain_id in
+        1) echo "Mainnet";;
+        10) echo "Optimism";;
+        42161) echo "Arbitrum";;
+        250) echo "Fantom";;
+        42170) echo "ArbitrumNova";;
+        56) echo "BSC";;
+        1285) echo "Moonriver";;
+        100) echo "Gnosis";;
+        43114) echo "Avalanche";;
+        137) echo "Polygon";;
+        1101) echo "PolygonZKEVM";;
+        42220) echo "Celo";;
+        8453) echo "Base";;
+        1088) echo "Metis";;
+        1666600000) echo "Harmony";;
+        324) echo "zkSync";;
+        59144) echo "Linea";;
+        *)
+            echo -e "Error: Unknown chain ID.\nPlease provide a valid chain ID."
+    esac;
+}
+
+get_chain_id() {
+    chain=$1
+    chain_l=$(echo "$chain" | tr '[:upper:]' '[:lower:]')
+
+    case $chain_l in
+        eth|ethereum|mainnet)    echo 1;;
+        op|optimism) echo 10;;
+        arb|arbitrum) echo 42161;;
+        ftm|fantom) echo 250;;
+        arbnova|arb_nova) echo 42170;;
+        bsc) echo 56;;
+        moon|moonriver) echo 1285;;
+        gnosis) echo 100;;
+        avax|avalance) echo 43114;;
+        poly|polygon) echo 137;;
+        polyzk|poly_zkevm|polygonzk|polygon_zkevm) echo 1101;;
+        celo) echo 42220;;
+        base) echo 8453;;
+        metis) echo 1088;;
+        harmony) echo 1666600000;;
+        zksync|zksyncera|zksync_era) echo 324;;
+        linea) echo 59144;;
+        *)
+            echo -e "Error: Unknown chain.\nSupported chains are:\n- Ethereum (eth, ethereum, mainnet)\n- Optimism (op)\n- Arbitrum (arb, arbnova, arb_nova)\n- Fantom (ftm)\n- Binance Smart Chain (bsc)\n- Moonriver (moon)\n- Gnosis (gnosis)\n- Avalanche (avax)\n- Polygon (poly)\n- Polygon ZK EVM (polyzk, poly_zkevm, polygonzk, polygon_zkevm)\n- Celo (celo)\n- Base (base)\n- Metis (metis)\n- Harmony (harmony)\n- zkSync (zksync, zksyncera, zksync_era)\n- Linea (linea)\nPlease provide a valid chain name."
+    esac;
+}
+
+current_chain_context() {
+    chain=$(get_chain_name $CHAIN)
+    echo "Current chain: $chain (ID=$CHAIN)"
+    echo "Current provider: $web3sh_CURRENT_PROVIDER (rpc(ETH_RPC_URL) = $ETH_RPC_URL)"
+    echo "Current etherscan url(ETHERSCAN_API_URL) = $ETHERSCAN_API_URL, key(ETHERSCAN_API_KEY) = $ETHERSCAN_API_KEY"
+}
+
+next_rpc() {
+   # web3sh_CURRENT_PROVIDER: alchemy -> infura -> infura_back -> ankr 
+    if [[ -z $web3sh_CURRENT_PROVIDER ]]; then
+        # inject default rpc provider
+        export web3sh_CURRENT_PROVIDER=alchemy
+    else
+        case $web3sh_CURRENT_PROVIDER in
+            alchemy) export web3sh_CURRENT_PROVIDER=infura;;
+            infura) 
+                if [[ $web3sh_INFRA_KEY == $web3sh_INFRA_KEY_DEFAULT ]]; then
+                    export web3sh_INFRA_KEY=$web3sh_INFRA_KEY_BACKUP
+                else
+                    export web3sh_INFRA_KEY=$web3sh_INFRA_KEY_DEFAULT
+                    export web3sh_CURRENT_PROVIDER=ankr
+                fi
+            ;;
+            ankr) export web3sh_CURRENT_PROVIDER=alchemy;;
+        esac;
+    fi
+}
+
+_get_provider() {
+    # web3sh_CURRENT_PROVIDER: alchemy -> infura -> infura_back -> ankr
+    chain_id=$1
+    if [[ -z $web3sh_CURRENT_PROVIDER ]]; then
+        # inject default rpc provider
+        export web3sh_CURRENT_PROVIDER=alchemy
+    fi
+
+    case $web3sh_CURRENT_PROVIDER in
+        alchemy) 
+            case $chain_id in
+                1) echo $web3sh_ALCHEMY_MAINNET;;
+                10) echo $web3sh_ALCHEMY_OPTIMISM;;
+                42161) echo $web3sh_ALCHEMY_ARBITRUM;;
+            #     250) echo "Fantom";;
+            #     42170) echo "ArbitrumNova";;
+            #     56) echo "BSC";;
+            #     1285) echo "Moonriver";;
+            #     100) echo "Gnosis";;
+            #     43114) echo "Avalanche";;
+                137) echo $web3sh_ALCHEMY_POLYGON;;
+                1101) echo $web3sh_ALCHEMY_POLYGON_ZKEVM;;
+            #     42220) echo "Celo";;
+            #     8453) echo "Base";;
+            #     1088) echo "Metis";;
+            #     1666600000) echo "Harmony";;
+            #     324) echo "zkSync";;
+            #     59144) echo "Linea";;
+                *)
+                    echo "alchemy not support {$chain_id}, try next provider: infura"
+                    export web3sh_CURRENT_PROVIDER=infura
+                    echo $(_get_provider $chain_id)
+            esac;
+        ;;
+        infura)
+            case $chain_id in
+                1) echo $web3sh_INFRA_Ethereum_Mainnet;;
+                10) echo $web3sh_INFRA_Optimism_Mainnet;;
+                42161) echo $web3sh_INFRA_Arbitrum_Mainnet;;
+                # 250) echo "Fantom";;
+                # 42170) echo "ArbitrumNova";;
+                # 56) echo "BSC";;
+                # 1285) echo "Moonriver";;
+                # 100) echo "Gnosis";;
+                43114) echo $web3sh_INFRA_Avalanche_Mainnet;;
+                137) echo $web3sh_ALCHEMY_POLYGON;;
+                1101) echo $web3sh_ALCHEMY_POLYGON_ZKEVM;;
+                42220) echo $web3sh_INFRA_Celo_Mainnet;;
+                # 8453) echo "Base";;
+                # 1088) echo "Metis";;
+                # 1666600000) echo "Harmony";;
+                # 324) echo "zkSync";;
+                59144) echo $web3sh_INFRA_Linea_Mainnet;;
+                *)
+                    echo "alchemy not support {$chain_id}, try next provider: ankr"
+                    export web3sh_CURRENT_PROVIDER=ankr
+                    echo $(_get_provider $chain_id)
+            esac;
+        ;;
+        ankr)
+            case $chain_id in
+                1) echo $web3sh_ANKR_ETH;;
+                10) echo $web3sh_ANKR_OPTIMISM;;
+                42161) echo $web3sh_ANKR_ARBITRUM;;
+                250) echo $web3sh_ANKR_FANTOM;;
+                42170) echo $web3sh_ANKR_ARBITRUM_NOVA;;
+                56) echo $web3sh_ANKR_BSC;;
+                1285) echo $web3sh_ANKR_MOONRIVER;;
+                100) echo $web3sh_ANKR_GNOSIS;;
+                43114) echo $web3sh_ANKR_AVALANCE;;
+                137) echo $web3sh_ANKR_POLYGON;;
+                1101) echo $web3sh_ANKR_POLYGON_ZKEVM;;
+                42220) echo $web3sh_ANKR_CELO;;
+                8453) echo $web3sh_ANKR_BASE;;
+            #     1088) echo "Metis";;
+                1666600000) echo $web3sh_ANKR_HARMONY;;
+                324) echo $web3sh_ANKR_ZKSYNC_ERA;;
+                # 59144) echo "Linea";;
+                *)
+                    echo -e "Error: No provider now supports {$chain_id} ..."
+            esac;
+        ;;
+        *)
+            echo -e "Error: Unknown Provider"
+    esac;
+
+}
+
+next_scan_key() {
+    if [[ -z $web3sh_CURRENT_ETHERSCAN_API_KEY ]]; then
+        # inject default rpc provider
+        export web3sh_CURRENT_ETHERSCAN_API_KEY=0
+    else
+        case $web3sh_CURRENT_ETHERSCAN_API_KEY in
+            0) export web3sh_CURRENT_ETHERSCAN_API_KEY=1;;
+            1) export web3sh_CURRENT_ETHERSCAN_API_KEY=2;;
+            2) export web3sh_CURRENT_ETHERSCAN_API_KEY=0;;
+        esac;
+    fi
+}
+
+_get_ethscan_api() {
+    chain_id=$1
+
+    if [[ -z $web3sh_CURRENT_ETHERSCAN_API_KEY ]]; then
+        # inject default rpc provider
+        export web3sh_CURRENT_ETHERSCAN_API_KEY=0
+    fi
+    
+    case $chain_id in
+        1) env_name_prefix="web3sh_POLYGONSCAN_API_KEY_";;
+        10) env_name_prefix="web3sh_OPTIMISMSCAN_API_KEY_";;
+        42161) env_name_prefix="web3sh_ARBSCAN_API_KEY_";;
+    #     250) echo "Fantom";;
+    #     42170) echo "ArbitrumNova";;
+        56) env_name_prefix="web3sh_BSCSCAN_API_KEY_";;
+    #     1285) echo "Moonriver";;
+    #     100) echo "Gnosis";;
+    #     43114) echo "Avalanche";;
+        137) env_name_prefix="web3sh_POLYGONSCAN_API_KEY_";;
+    #     1101) echo "PolygonZKEVM";;
+    #     42220) echo "Celo";;
+    #     8453) echo "Base";;
+    #     1088) echo "Metis";;
+    #     1666600000) echo "Harmony";;
+    #     324) echo "zkSync";;
+    #     59144) echo "Linea";;
+        *)
+            echo -e "Error: etherscan not support for the Chain-$chain_id"
+    esac;
+
+    if [[ -n $env_name_prefix ]]; then
+        env_name="$env_name_prefix$web3sh_CURRENT_ETHERSCAN_API_KEY"
+        eval "echo \$$env_name"
+    else
+        echo -e "Error: etherscan api not found"
+    fi
+}
+
+_get_ethscan_api_url() {
+    chain_id=$1
+
+    if [[ -z $web3sh_CURRENT_ETHERSCAN_API_KEY ]]; then
+        # inject default rpc provider
+        export web3sh_CURRENT_ETHERSCAN_API_KEY=0
+    fi
+
+    case $chain_id in
+        1) echo $web3sh_ETHERSCAN_MAINNET;;
+        10) echo $web3sh_OPTIMISMSCAN_MAINNET;;
+        42161) echo $web3sh_ARBSCAN_MAINNET;;
+    #     250) echo "Fantom";;
+    #     42170) echo "ArbitrumNova";;
+        56) echo $web3sh_BSCSCAN_MAINNET;;
+    #     1285) echo "Moonriver";;
+    #     100) echo "Gnosis";;
+    #     43114) echo "Avalanche";;
+        137) echo $web3sh_POLYGONSCAN_MAINNET;;
+    #     1101) echo "PolygonZKEVM";;
+    #     42220) echo "Celo";;
+    #     8453) echo "Base";;
+    #     1088) echo "Metis";;
+    #     1666600000) echo "Harmony";;
+    #     324) echo "zkSync";;
+    #     59144) echo "Linea";;
+        *)
+            echo -e "Error: etherscan not support for the Chain-$chain_id"
+    esac;
+}

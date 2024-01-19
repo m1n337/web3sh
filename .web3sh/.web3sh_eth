@@ -1,0 +1,50 @@
+# Etherscan API
+# Get Ether Last Price: https://docs.etherscan.io/api-endpoints/stats-1#get-ether-last-price
+get_eth_price() {
+    output=$(curl -s -X GET "https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${web3sh_ETHERSCAN_API_KEY_0}")
+    usdTimestamp=$(echo $output | jq '.result.ethusd_timestamp' | tr -d '"')
+    usdPrice=$(echo $output | jq '.result.ethusd' | tr -d '"')
+    btcTimestamp=$(echo $output | jq '.result.ethbtc_timestamp' | tr -d '"')
+    btcPrice=$(echo $output | jq '.result.ethbtc' | tr -d '"')    
+
+    echo "ETH/USD (@${usdTimestamp}): \$${usdPrice}"
+    echo "ETH/BTC (@${btcTimestamp}): ${btcPrice}"
+}
+
+_get_eth_usd_price() {
+    output=$(curl -s -X GET "https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${web3sh_ETHERSCAN_API_KEY_0}")
+    usdPrice=$(echo $output | jq '.result.ethusd' | tr -d '"')
+    
+    printf "%.2f\n" $usdPrice
+}
+
+# Block native api
+# cgas: swap (estimated price for gas of the UniversalRouter.execute)
+cgas() {
+    local type=$1
+    output=$(curl -s -H \"Authorization: ${BLOCK_NATIVE_KEY}\" https://api.blocknative.com/gasprices/blockprices | jq '{blockNumber: .blockPrices[0].blockNumber, baseFeePerGas: .blockPrices[0].baseFeePerGas, estimatedPrice: .blockPrices[0].estimatedPrices[0]}')
+    blockNumber=$(echo "$output" | jq '.blockNumber')
+    baseFeePerGas=$(echo "$output" | jq '.baseFeePerGas')
+    # confidence=$(echo "$output" | jq '.estimatedPrice.confidence')
+    price=$(echo "$output" | jq '.estimatedPrice.price')
+    maxPriorityFeePerGas=$(echo "$output" | jq '.estimatedPrice.maxPriorityFeePerGas')
+    maxFeePerGas=$(echo "$output" | jq '.estimatedPrice.maxFeePerGas')
+    echo "\033[31mblock.number\033[0m: ${blockNumber}"
+    echo "\033[34mgasPrice\033[0m: ${price} (99%)"
+    echo "\033[90m  # baseFee = ${baseFeePerGas}, maxFee = ${maxFeePerGas}, priorityFee = ${maxPriorityFeePerGas}\033[0m"
+    
+    if [ ! -z "$type" ]; then
+        # avg_cost = 200,000
+        case $type in
+            "swap")
+                eth_price=$(_get_eth_usd_price)
+                cost_min="0$(echo "scale=5; (${maxFeePerGas} + ${maxPriorityFeePerGas}) * 120000.0 / 1000000000.0" | bc)"
+                cost_min_value=$(echo "scale=2; ${cost_min} * ${eth_price}" | bc)
+                cost_max="0$(echo "scale=5; (${maxFeePerGas} + ${maxPriorityFeePerGas}) * 200000.0 / 1000000000.0" | bc)"
+                cost_max_value=$(echo "scale=2; ${cost_max} * ${eth_price}" | bc)
+                echo "\033[35mswap estimated\033[0m: ${cost_min} (120,000) - ${cost_max} (200,000) ETH"
+                echo "\033[90m  # \$${cost_min_value} (120,000) - \$${cost_max_value} (200,000) ETH@${eth_price}\033[0m"
+            ;;
+        esac
+    fi
+}

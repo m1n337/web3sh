@@ -1,0 +1,104 @@
+
+# BlockNative: https://www.blocknative.com/
+web3sh_BLOCK_NATIVE_KEY=
+
+# ================================================ Etherscan
+# web3sh_CURRENT_ETHERSCAN_API_KEY=<n>
+# account: 
+## Etherscan: https://etherscan.io/
+web3sh_ETHERSCAN_API_KEY_0=
+web3sh_ETHERSCAN_API_KEY_1=
+web3sh_ETHERSCAN_API_KEY_2=
+web3sh_ETHERSCAN_MAINNET=https://api.etherscan.io/api
+web3sh_ETHERSCAN_SEPOLIA=https://api-sepolia.etherscan.io/api
+
+## Polygonscan: https://polygonscan.com/	
+web3sh_POLYGONSCAN_API_KEY_0=
+web3sh_POLYGONSCAN_API_KEY_1=
+web3sh_POLYGONSCAN_API_KEY_2=
+web3sh_POLYGONSCAN_MAINNET=https://api.polygonscan.com/api
+web3sh_POLYGONSCAN_TESTNET=https://api-testnet.polygonscan.com/api
+
+## Bscscan: https://bscscan.com/	
+web3sh_BSCSCAN_API_KEY_0=
+web3sh_BSCSCAN_API_KEY_1=
+web3sh_BSCSCAN_API_KEY_2=
+web3sh_BSCSCAN_MAINNET=https://api.bscscan.com/api
+web3sh_BSCSCAN_TESTNET=https://api-testnet.bscscan.com/api
+
+## Optimismscan: https://optimistic.etherscan.io/
+web3sh_OPTIMISMSCAN_API_KEY_0=
+web3sh_OPTIMISMSCAN_API_KEY_1=
+web3sh_OPTIMISMSCAN_API_KEY_2=
+web3sh_OPTIMISMSCAN_MAINNET=https://api-optimistic.etherscan.io/
+web3sh_OPTIMISMSCAN_TESTNET=https://api-goerli-optimistic.etherscan.io/
+
+## Arbscan: https://arbiscan.io/
+web3sh_ARBSCAN_API_KEY_0=
+web3sh_ARBSCAN_API_KEY_1=
+web3sh_ARBSCAN_API_KEY_2=
+web3sh_ARBSCAN_MAINNET=https://api.arbiscan.io/api
+web3sh_ARBSCAN_SEPOLIA=https://api-sepolia.arbiscan.io/api
+
+## Ftmscan: https://ftmscan.com/
+## Cronosscan: https://cronoscan.com/
+## Moonscan: https://moonscan.io/
+
+
+# ================================================ RPC Providers
+
+# web3sh_CURRENT_PROVIDER=<name>
+# Ankr: Public
+web3sh_ANKR_POLYGON=https://rpc.ankr.com/polygon
+web3sh_ANKR_POLYGON_MUMBAI=https://rpc.ankr.com/polygon_mumbai
+web3sh_ANKR_BSC=https://rpc.ankr.com/bsc
+web3sh_ANKR_BSC_TESTNET=https://rpc.ankr.com/bsc_testnet_chapel
+web3sh_ANKR_ETH=https://rpc.ankr.com/eth
+web3sh_ANKR_ETH_SEPOLIA=https://rpc.ankr.com/eth_sepolia
+web3sh_ANKR_FANTOM=https://rpc.ankr.com/fantom
+web3sh_ANKR_FANTOM_TESTNET=https://rpc.ankr.com/fantom_testnet
+web3sh_ANKR_OPTIMISM=https://rpc.ankr.com/optimism
+web3sh_ANKR_OPTIMISM_SEPOLIA=https://rpc.ankr.com/optimism_sepolia
+web3sh_ANKR_ARBITRUM=https://rpc.ankr.com/arbitrum
+web3sh_ANKR_ARBITRUM_NOVA=https://rpc.ankr.com/arbitrumnova
+web3sh_ANKR_MOONRIVER=https://rpc.ankr.com/moonbeam
+web3sh_ANKR_GNOSIS=https://rpc.ankr.com/gnosis
+web3sh_ANKR_AVALANCE=https://rpc.ankr.com/avalanche
+web3sh_ANKR_AVALANCE_FUJI=https://rpc.ankr.com/avalanche_fuji
+web3sh_ANKR_CELO=https://rpc.ankr.com/celo
+web3sh_ANKR_BASE=https://rpc.ankr.com/base
+web3sh_ANKR_POLYGON_ZKEVM=https://rpc.ankr.com/polygon_zkevm
+web3sh_ANKR_HARMONY=https://rpc.ankr.com/harmony
+web3sh_ANKR_ZKSYNC_ERA=https://rpc.ankr.com/zksync_era
+web3sh_ANKR_SCROLL=https://rpc.ankr.com/scroll
+
+# Infura: Public
+# account: 
+web3sh_INFRA_KEY_DEFAULT=
+# backup account: 
+web3sh_INFRA_KEY_BACKUP=
+web3sh_INFRA_KEY=$web3sh_INFRA_KEY_DEFAULT
+
+web3sh_INFRA_Ethereum_Mainnet=https://mainnet.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Ethereum_Sepolia=https://sepolia.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Linea_Mainnet=https://linea-mainnet.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Polygon_Mainnet=https://polygon-mainnet.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Polygon_Mumbai=https://polygon-mumbai.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Avalanche_Mainnet=https://avalanche-mainnet.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Avalanche_Fuji=https://avalanche-fuji.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Arbitrum_Mainnet=https://arbitrum-mainnet.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Arbitrum_Sepolia=https://arbitrum-sepolia.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Optimism_Mainnet=https://optimism-mainnet.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Optimism_Sepolia=https://optimism-sepolia.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Starknet_Mainnet=https://starknet-mainnet.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Starknet_Sepolia=https://starknet-sepolia.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Palm_Mainnet=https://palm-mainnet.infura.io/v3/$web3sh_INFRA_KEY
+web3sh_INFRA_Celo_Mainnet=https://celo-mainnet.infura.io/v3/$web3sh_INFRA_KEY
+
+# Alchemy: https://www.alchemy.com/
+# account: 
+web3sh_ALCHEMY_MAINNET=
+web3sh_ALCHEMY_POLYGON=
+web3sh_ALCHEMY_POLYGON_ZKEVM=
+web3sh_ALCHEMY_ARBITRUM=
+web3sh_ALCHEMY_OPTIMISM=

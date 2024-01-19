@@ -1,0 +1,7 @@
+ROOT=$HOME/.web3sh
+
+source $ROOT/.web3env
+
+source $ROOT/.web3sh_utils
+source $ROOT/.web3sh_eth
+source $ROOT/.web3sh_provider
