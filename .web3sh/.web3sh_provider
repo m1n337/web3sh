@@ -220,7 +220,7 @@ _get_ethscan_api() {
     fi
     
     case $chain_id in
-        1) env_name_prefix="web3sh_POLYGONSCAN_API_KEY_";;
+        1) env_name_prefix="web3sh_ETHERSCAN_API_KEY_";;
         10) env_name_prefix="web3sh_OPTIMISMSCAN_API_KEY_";;
         42161) env_name_prefix="web3sh_ARBSCAN_API_KEY_";;
     #     250) echo "Fantom";;
