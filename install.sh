@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # check exist
-if [[ ! -f .web3sh/.web3env ]]; then
+if [ ! -f .web3sh/.web3env ]; then
     echo -e "Error: The '.web3env' file is missing. \nTo set up the necessary environment variables, please first create this file by running 'cp /.web3sh/.web3env.example /.web3sh/.web3env', and then ensure to correctly populate it with your environment settings."
     exit 1
 fi
@@ -32,7 +32,8 @@ case $SHELL in
 esac
 
 # append the source command to the PROFILE
-if [[ -n $(cat $PROFILE | grep .web3sh) ]]; then                                                                                                                                                                                                                         ──(Fri,Jan19)─┘
+profile_grep_result=$(cat $PROFILE | grep .web3sh)
+if [ -n "$profile_grep_result" ]; then
     echo "source web3sh command already added to the profile."
 else
     echo >> $PROFILE && echo "source ~/.web3sh/.web3sh_main" >> $PROFILE
