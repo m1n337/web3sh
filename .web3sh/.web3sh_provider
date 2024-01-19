@@ -27,8 +27,6 @@ unset_chain() {
     unset ETHERSCAN_API_KEY
     unset ETHERSCAN_API_URL
     unset CHAIN
-
-    unset $(env | grep '^web3sh_' | awk -F'=' '{print $1}')  
 }
 
 get_chain_name() {

@@ -26,5 +26,7 @@ esac
 cp $PROFILE $PROFILE.backup
 sed -i '' "/source ~\/\.web3sh\/\.web3sh_main/d" $PROFILE
 
-cp -r $HOME/.web3sh $HOME/.web3sh_backup
-rm -rf $HOME/.web3sh
+if [ -d $HOME/.web3sh ]; then
+    cp -r $HOME/.web3sh $HOME/.web3sh_backup
+    rm -rf $HOME/.web3sh
+fi
