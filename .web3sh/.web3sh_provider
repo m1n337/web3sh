@@ -14,15 +14,23 @@ select_chain() {
             echo "Select context for ${chain_name_res} (id=${chain_id_res}) ..."
 
             # foundry/cast format environments
-            export ETH_RPC_URL=$(_get_provider $chain_id_res)
-            export ETHERSCAN_API_KEY=$(_get_ethscan_api $chain_id_res)
-            export ETHERSCAN_API_URL=$(_get_ethscan_api_url $chain_id_res)
-            export CHAIN=$chain_id_res
+            provider_res=$(_get_provider $chain_id_res)
+            if [ -z $provider_res ]; then
+                echo -e "Error: provider not found"
+            else
+                read provider rpc <<< "$provider_res"
+                export web3sh_CURRENT_PROVIDER=$provider
+                export ETH_RPC_URL=$rpc
+                export ETHERSCAN_API_KEY=$(_get_ethscan_api $chain_id_res)
+                export ETHERSCAN_API_URL=$(_get_ethscan_api_url $chain_id_res)
+                export CHAIN=$chain_id_res
+            fi
         fi  
     fi
 }
 
 unset_chain() {
+    unset web3sh_CURRENT_PROVIDER
     unset ETH_RPC_URL
     unset ETHERSCAN_API_KEY
     unset ETHERSCAN_API_URL
@@ -121,17 +129,17 @@ _get_provider() {
     case $web3sh_CURRENT_PROVIDER in
         alchemy) 
             case $chain_id in
-                1) echo $web3sh_ALCHEMY_MAINNET;;
-                10) echo $web3sh_ALCHEMY_OPTIMISM;;
-                42161) echo $web3sh_ALCHEMY_ARBITRUM;;
+                1) echo "alchemy $web3sh_ALCHEMY_MAINNET";;
+                10) echo "alchemy $web3sh_ALCHEMY_OPTIMISM";;
+                42161) echo "alchemy $web3sh_ALCHEMY_ARBITRUM";;
             #     250) echo "Fantom";;
             #     42170) echo "ArbitrumNova";;
             #     56) echo "BSC";;
             #     1285) echo "Moonriver";;
             #     100) echo "Gnosis";;
             #     43114) echo "Avalanche";;
-                137) echo $web3sh_ALCHEMY_POLYGON;;
-                1101) echo $web3sh_ALCHEMY_POLYGON_ZKEVM;;
+                137) echo "alchemy $web3sh_ALCHEMY_POLYGON";;
+                1101) echo "alchemy $web3sh_ALCHEMY_POLYGON_ZKEVM";;
             #     42220) echo "Celo";;
             #     8453) echo "Base";;
             #     1088) echo "Metis";;
@@ -139,63 +147,64 @@ _get_provider() {
             #     324) echo "zkSync";;
             #     59144) echo "Linea";;
                 *)
-                    echo "alchemy not support {$chain_id}, try next provider: infura"
+                    # echo -e "alchemy not support {$chain_id}, try next provider: infura"
                     export web3sh_CURRENT_PROVIDER=infura
                     echo $(_get_provider $chain_id)
             esac;
         ;;
         infura)
             case $chain_id in
-                1) echo $web3sh_INFRA_Ethereum_Mainnet;;
-                10) echo $web3sh_INFRA_Optimism_Mainnet;;
-                42161) echo $web3sh_INFRA_Arbitrum_Mainnet;;
+                1) echo "infura $web3sh_INFRA_Ethereum_Mainnet";;
+                10) echo "infura $web3sh_INFRA_Optimism_Mainnet";;
+                42161) echo "infura $web3sh_INFRA_Arbitrum_Mainnet";;
                 # 250) echo "Fantom";;
                 # 42170) echo "ArbitrumNova";;
                 # 56) echo "BSC";;
                 # 1285) echo "Moonriver";;
                 # 100) echo "Gnosis";;
-                43114) echo $web3sh_INFRA_Avalanche_Mainnet;;
-                137) echo $web3sh_ALCHEMY_POLYGON;;
-                1101) echo $web3sh_ALCHEMY_POLYGON_ZKEVM;;
-                42220) echo $web3sh_INFRA_Celo_Mainnet;;
+                43114) echo "infura $web3sh_INFRA_Avalanche_Mainnet";;
+                137) echo "infura $web3sh_ALCHEMY_POLYGON";;
+                1101) echo "infura $web3sh_ALCHEMY_POLYGON_ZKEVM";;
+                42220) echo "infura $web3sh_INFRA_Celo_Mainnet";;
                 # 8453) echo "Base";;
                 # 1088) echo "Metis";;
                 # 1666600000) echo "Harmony";;
                 # 324) echo "zkSync";;
-                59144) echo $web3sh_INFRA_Linea_Mainnet;;
+                59144) echo "infura $web3sh_INFRA_Linea_Mainnet";;
                 *)
-                    echo "alchemy not support {$chain_id}, try next provider: ankr"
+                    # echo -e "alchemy not support {$chain_id}, try next provider: ankr"
                     export web3sh_CURRENT_PROVIDER=ankr
                     echo $(_get_provider $chain_id)
             esac;
         ;;
         ankr)
             case $chain_id in
-                1) echo $web3sh_ANKR_ETH;;
-                10) echo $web3sh_ANKR_OPTIMISM;;
-                42161) echo $web3sh_ANKR_ARBITRUM;;
-                250) echo $web3sh_ANKR_FANTOM;;
-                42170) echo $web3sh_ANKR_ARBITRUM_NOVA;;
-                56) echo $web3sh_ANKR_BSC;;
-                1285) echo $web3sh_ANKR_MOONRIVER;;
-                100) echo $web3sh_ANKR_GNOSIS;;
-                43114) echo $web3sh_ANKR_AVALANCE;;
-                137) echo $web3sh_ANKR_POLYGON;;
-                1101) echo $web3sh_ANKR_POLYGON_ZKEVM;;
-                42220) echo $web3sh_ANKR_CELO;;
-                8453) echo $web3sh_ANKR_BASE;;
+                1) echo "ankr $web3sh_ANKR_ETH";;
+                10) echo "ankr $web3sh_ANKR_OPTIMISM";;
+                42161) echo "ankr $web3sh_ANKR_ARBITRUM";;
+                250) echo "ankr $web3sh_ANKR_FANTOM";;
+                42170) echo "ankr $web3sh_ANKR_ARBITRUM_NOVA";;
+                56) echo "ankr $web3sh_ANKR_BSC";;
+                1285) echo "ankr $web3sh_ANKR_MOONRIVER";;
+                100) echo "ankr $web3sh_ANKR_GNOSIS";;
+                43114) echo "ankr $web3sh_ANKR_AVALANCE";;
+                137) echo "ankr $web3sh_ANKR_POLYGON";;
+                1101) echo "ankr $web3sh_ANKR_POLYGON_ZKEVM";;
+                42220) echo "ankr $web3sh_ANKR_CELO";;
+                8453) echo "ankr $web3sh_ANKR_BASE";;
             #     1088) echo "Metis";;
-                1666600000) echo $web3sh_ANKR_HARMONY;;
-                324) echo $web3sh_ANKR_ZKSYNC_ERA;;
+                1666600000) echo "ankr $web3sh_ANKR_HARMONY";;
+                324) echo "ankr $web3sh_ANKR_ZKSYNC_ERA";;
                 # 59144) echo "Linea";;
                 *)
-                    echo -e "Error: No provider now supports {$chain_id} ..."
+                    # echo -e "Error: No provider now supports {$chain_id} ..."
+                    echo ""
             esac;
         ;;
         *)
-            echo -e "Error: Unknown Provider"
+            # echo -e "Error: Unknown Provider"
+            echo ""
     esac;
-
 }
 
 next_scan_key() {
