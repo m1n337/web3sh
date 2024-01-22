@@ -86,23 +86,20 @@ _get_abi() {
     fi
 }
 
-# _get_source_code() {
-#     address=$1
-#     output_raw=$(curl -s -X GET "https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${address}&apikey=${web3sh_ETHERSCAN_API_KEY_0}")
-#     output=$(echo $output_raw | sed 's/[\x00-\x1F\x7F]//g')
-#     status=$(echo $output | jq -r '.status')
-#     if [[ "$status" == "1" ]]; then
-#         result=$(echo $output | jq -r '.result')
-#         echo $result
-#     else
-#         echo ""
-#     fi
-# }
+_get_source_code() {
+    address=$1
+
+    output=$(curl -s -X GET "https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${address}&apikey=${web3sh_ETHERSCAN_API_KEY_0}" | jq -r '.result')
+
+    if [[ -n $output ]]; then
+        echo $output
+    fi
+}
 
 _get_creation() {
     addresses=$1
     output=$(curl -s -X GET "https://api.etherscan.io/api?module=contract&action=getcontractcreation&contractaddresses=${addresses}&apikey=${web3sh_ETHERSCAN_API_KEY_0}")
-        msg=$(echo $output | jq -r '.message')
+    msg=$(echo $output | jq -r '.message')
     if [[ "$msg" == "OK" ]]; then
         result=$(echo $output | jq -r '.result')
         echo $result
