@@ -1,4 +1,153 @@
 # Etherscan API
+eth_scan_helper_doc='
+Terminal command implementation for etherscan APIs.
+
+Usage: ethscan <COMMAND>
+
+Commands:
+    contracts etherscan contracts apis
+    proxy   etherscan Geth/Parity Proxy module
+'
+ethscan() {
+    cmd=$1
+    if [[ -z "$cmd" ]]; then
+        echo $eth_scan_helper_doc
+    else
+        case $cmd in
+            "contracts")
+                sub_cmd=$2
+                if [[ -z "$sub_cmd" ]]; then
+                    echo $eth_scan_contracts_helper_doc
+                else
+                    args=$3
+                    if [[ -z "$args" ]]; then
+                        echo $eth_scan_contracts_helper_doc
+                    else
+                        case $sub_cmd in
+                            "abi")
+                                echo $(_get_abi $args)
+                            ;;
+                            "src")
+                                echo "TBD"
+                            ;;
+                            "creation")
+                                echo $(_get_creation $args)
+                            ;;
+                            "creation_time")
+                                echo $(_get_creation_time $args)
+                            ;;
+                        esac;
+                    fi        
+                fi
+            ;;
+            "proxy") 
+                sub_cmd=$2
+                if [[ -z "$sub_cmd" ]]; then
+                    echo $eth_scan_proxy_helper_doc
+                else
+                    latestBlockNumber=$(_get_eth_block)
+                    if [[ -z "$latestBlockNumber" ]]; then
+                        echo -e "Error: failed to call eth_blockNumber"
+                        break
+                    fi
+                    echo "[eth_blockNumber] latest block number: ${latestBlockNumber}"
+                fi
+            ;;
+            *);;
+        esac;
+    fi
+}
+
+# module: Accounts (https://docs.etherscan.io/api-endpoints/accounts)
+# action: txlist
+
+# action: txlistinternal
+
+# module: Contracts (https://docs.etherscan.io/api-endpoints/contracts)
+eth_scan_contracts_helper_doc='
+Usage:
+    ethscan contracts abi <ADDRESS>
+    ethscan contracts src <ADDRESS>
+    ethscan contracts creation <ADDRESSES>
+    ethscan contracts creation_time <ADDRESS>
+    
+    Note: <ADDRESSES> = <ADDRESS_0>,<ADDRESS_1>,...
+'
+# action: getabi
+_get_abi() {
+    address=$1
+    output=$(curl -s -X GET "https://api.etherscan.io/api?module=contract&action=getabi&address=${address}&apikey=${web3sh_ETHERSCAN_API_KEY_0}")
+    msg=$(echo $output | jq -r '.message')
+    if [[ "$msg" == "OK" ]]; then
+        result=$(echo $output | jq -r '.result')
+        echo $result
+    else
+        echo ""
+    fi
+}
+
+# _get_source_code() {
+#     address=$1
+#     output_raw=$(curl -s -X GET "https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${address}&apikey=${web3sh_ETHERSCAN_API_KEY_0}")
+#     output=$(echo $output_raw | sed 's/[\x00-\x1F\x7F]//g')
+#     status=$(echo $output | jq -r '.status')
+#     if [[ "$status" == "1" ]]; then
+#         result=$(echo $output | jq -r '.result')
+#         echo $result
+#     else
+#         echo ""
+#     fi
+# }
+
+_get_creation() {
+    addresses=$1
+    output=$(curl -s -X GET "https://api.etherscan.io/api?module=contract&action=getcontractcreation&contractaddresses=${addresses}&apikey=${web3sh_ETHERSCAN_API_KEY_0}")
+        msg=$(echo $output | jq -r '.message')
+    if [[ "$msg" == "OK" ]]; then
+        result=$(echo $output | jq -r '.result')
+        echo $result
+    else
+        echo ""
+    fi
+}
+
+_get_creation_time() {
+    address=$1
+    creation_info=$(_get_creation $address)
+    if [[ -n "$creation_info" ]]; then
+        creation_tx=$(echo $creation_info | jq -r '.[0].txHash')
+        block_number_hex=$(cast tx --rpc-url $web3sh_ANKR_ETH -j $creation_tx | jq -r '.blockNumber')
+        block_number=$(printf "%d" $block_number_hex)
+        
+        echo $block_number
+    else
+        echo ""
+    fi
+}
+
+# module: Transactions ()
+
+# module: proxy (https://docs.etherscan.io/api-endpoints/geth-parity-proxy)
+eth_scan_proxy_helper_doc='
+Usage:
+    ethscan proxy <API_METHOD> <API_ARGUMENTS>
+
+Example for Supported API_METHOD:
+    ethscan proxy blockNumber
+'
+# action: eth_blockNumber
+_get_eth_block() {
+    output=$(curl -s -X GET "https://api.etherscan.io/api?module=proxy&action=eth_blockNumber&apikey=${web3sh_ETHERSCAN_API_KEY_0}")
+    result_hex=$(echo $output | jq -r '.result')
+
+    if [[ $result_hex =~ ^0x[0-9a-fA-F]+$ ]]; then
+        result_dec=$(printf "%d" $result_hex)
+        echo $result_dec
+    else
+        echo ""
+    fi
+}
+
 # Get Ether Last Price: https://docs.etherscan.io/api-endpoints/stats-1#get-ether-last-price
 get_eth_price() {
     output=$(curl -s -X GET "https://api.etherscan.io/api?module=stats&action=ethprice&apikey=${web3sh_ETHERSCAN_API_KEY_0}")
@@ -17,6 +166,7 @@ _get_eth_usd_price() {
     
     printf "%.2f\n" $usdPrice
 }
+
 
 # Block native api
 # cgas: swap (estimated price for gas of the UniversalRouter.execute)
